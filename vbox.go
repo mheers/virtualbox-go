@@ -132,6 +132,37 @@ func (vb *VBox) control(vm *VirtualMachine, args ...string) (string, error) {
 	return vb.manage(append([]string{"controlvm", vm.UUIDOrName()}, args...)...)
 }
 
+func (vb *VBox) ListVMs() (map[string]*VirtualMachine, error) {
+	listOutput, err := vb.manage("list", "vms", "-l")
+	if err != nil {
+		return nil, err
+	}
+
+	m := make(map[string]*VirtualMachine)
+
+	var vm *VirtualMachine
+
+	err = parseKeyValues(listOutput, reColonLine, func(key, val string) error {
+		switch key {
+		case "Name":
+			vm = &VirtualMachine{
+				Spec: VirtualMachineSpec{
+					Name: val,
+				},
+			}
+			m[val] = vm
+		case "UUID":
+			vm.UUID = val
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
+
 func (vb *VBox) ListDHCPServers() (map[string]*DHCPServer, error) {
 	listOutput, err := vb.manage("list", "dhcpservers")
 	if err != nil {
