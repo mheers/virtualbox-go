@@ -145,8 +145,10 @@ func (vb *VBox) ListVMs() (map[string]*VirtualMachine, error) {
 	err = parseKeyValues(listOutput, reColonLine, func(key, val string) error {
 		switch key {
 		case "Name":
-			vm, _ = vb.VMInfo(val)
-			m[val] = vm
+			if val != "<inaccessible!>" {
+				vm, _ = vb.VMInfo(val)
+				m[val] = vm
+			}
 		}
 		return nil
 	})
