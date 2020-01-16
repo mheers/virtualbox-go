@@ -145,14 +145,8 @@ func (vb *VBox) ListVMs() (map[string]*VirtualMachine, error) {
 	err = parseKeyValues(listOutput, reColonLine, func(key, val string) error {
 		switch key {
 		case "Name":
-			vm = &VirtualMachine{
-				Spec: VirtualMachineSpec{
-					Name: val,
-				},
-			}
+			vm, _ = vb.VMInfo(val)
 			m[val] = vm
-		case "UUID":
-			vm.UUID = val
 		}
 		return nil
 	})
