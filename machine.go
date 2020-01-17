@@ -31,6 +31,15 @@ func (vb *VBox) CreateVM(vm *VirtualMachine) error {
 	return err
 }
 
+func (vb *VBox) ImportVM(path string, name string) error {
+	args := []string{"import", path, "--vsys", "0", "--vmname", name}
+	//args = append(args, "--basefolder", strconv.Quote(vm.Path))
+	args = append(args, "--basefolder", vb.Config.BasePath)
+
+	_, err := vb.manage(args...)
+	return err
+}
+
 // DeleteVM removes the setting file and must be  used with caution.  The VM must be unregistered before calling this
 func (vb *VBox) DeleteVM(vm *VirtualMachine) error {
 	return os.RemoveAll(vb.getVMSettingsFile(vm))
@@ -118,6 +127,9 @@ func (vb *VBox) EnableIOAPIC(vm *VirtualMachine) (string, error) {
 }
 func (vb *VBox) VMInfo(uuidOrVmName string) (machine *VirtualMachine, err error) {
 	out, err := vb.manage("showvminfo", uuidOrVmName, "--machinereadable")
+	if err != nil {
+		return nil, err
+	}
 
 	// lets populate the map from output strings
 	m := map[string]interface{}{}
